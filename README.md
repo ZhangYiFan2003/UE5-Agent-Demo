@@ -1,10 +1,30 @@
 # UE5 Agent Demo
 
-A minimal Unreal Engine 5.5 interview demo reusing the existing character, input widget, HTTP connector, and movement command.
+A minimal **Unreal Engine 5.5 Agent integration demo**: natural-language instructions become structured JSON commands, and Unreal command handlers execute the character actions. The model selects high-level actions; game-side execution remains deterministic.
 
-User instruction → LLM API → JSON command → Unreal command handler → character action.
+Based on [Sovahero/UnrealAiConnector](https://github.com/Sovahero/UnrealAiConnector). This fork focuses on understanding and adapting the **Agent → structured command → game runtime** path, reusing the existing plugin, input widget, character, and movement example. The original project and plugin remain licensed under the [MIT License](LICENSE).
 
-Based on [Sovahero/UnrealAiConnector](https://github.com/Sovahero/UnrealAiConnector). The original project and plugin remain licensed under the MIT License; see LICENSE.
+Current example: **“Walk forward for 3 seconds”** → `move` / `character` / `["forward#3"]` → character movement. Compilation, LLM requests, and movement have **not yet been verified on this machine**.
+
+```mermaid
+flowchart LR
+    A[Player Instruction] --> B[UE5 Input Widget]
+    B --> C[LLM Connector]
+    C --> D[LLM API]
+    D --> E[Structured JSON Command]
+    E --> F[UE Command Handler]
+    F --> G[Character Action]
+```
+
+## What this demo shows
+
+- UE5 / Blueprint and C++ integration
+- HTTP-based LLM interaction
+- Structured Agent commands guided by registered command descriptions
+- Command dispatch through Unreal handlers
+- Deterministic game-side action execution
+
+[Interview notes](docs/INTERVIEW_DEMO.md) explain the integration and this fork's changes.
 
 ## Phase 1 setup (Windows)
 
