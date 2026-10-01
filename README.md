@@ -1,3 +1,42 @@
+# UE5 Agent Demo
+
+A minimal Unreal Engine 5.5 interview demo reusing the existing character, input widget, HTTP connector, and movement command.
+
+User instruction → LLM API → JSON command → Unreal command handler → character action.
+
+Based on [Sovahero/UnrealAiConnector](https://github.com/Sovahero/UnrealAiConnector). The original project and plugin remain licensed under the MIT License; see LICENSE.
+
+## Phase 1 setup (Windows)
+
+Requires Unreal Engine **5.5**, Visual Studio 2022 with C++ game development tools, and the Windows SDK required by UE 5.5. The project already contains the patched plugin at `AiTestProject/Plugins/LLMConnector`; no plugin copy or asset editing is needed. The top-level plugin source is patched too. The credential-bearing upstream prebuilt DLL has been removed, so build the plugin locally:
+
+```powershell
+# Run from the repository root. Select your existing UE 5.5 installation folder.
+$ueRoot = Read-Host 'UE 5.5 installation folder'
+$plugin = (Resolve-Path '.\AiTestProject\Plugins\LLMConnector\LLMConnector.uplugin').Path
+$package = Join-Path (Get-Location) 'AiTestProject\Saved\LLMConnectorBuild'
+& "$ueRoot\Engine\Build\BatchFiles\RunUAT.bat" BuildPlugin "-Plugin=$plugin" "-Package=$package" -TargetPlatforms=Win64
+# Continue only if the build succeeds.
+Copy-Item "$package\Binaries" '.\AiTestProject\Plugins\LLMConnector\' -Recurse -Force
+```
+
+Supply your own API key **only in this PowerShell process**, then launch the Editor from the same shell so it inherits the key:
+
+```powershell
+$env:UE_AGENT_API_KEY = Read-Host 'OpenRouter API key'
+& "$ueRoot\Engine\Binaries\Win64\UnrealEditor.exe" (Resolve-Path '.\AiTestProject\AiTestProject.uproject').Path
+```
+
+The key is transient and is never saved by plugin settings. Do not put it in source, `.ini` files, or shell command literals. Close this shell when finished. Upstream Git history is preserved and still contains its original credential; do not use that credential.
+
+1. In **Edit → Project Settings → Plugins → LLM Connector**, keep the OpenRouter API URL and set **ModelName** to an available model supporting `response_format: json_object`.
+2. Open **Content → TopDown → Maps → TopDownMap** if it is not already open.
+3. Click **Play**, enter **Walk forward for 3 seconds** in the existing input widget, and click its send button.
+4. Check the response/command display and movement. **Window → Developer Tools → Output Log** contains connector diagnostics.
+
+Generated build files are ignored. UE compilation, API access, and character movement require the local smoke test above; they have not been verified on this machine. No new commands, UI, maps, or characters are added.
+
+---
 ![AiConnectorLogo](https://github.com/user-attachments/assets/3329e122-0b56-4f57-9bbb-637db1b91776)<br>
 
 ## AI Connector for Unreal Engine 5
@@ -68,7 +107,7 @@ To use the plugin:
 ![Model](https://github.com/user-attachments/assets/9f34f3dc-d087-426f-ae71-7fb0bb59921d)<br>
 
 5. Go to `Project Settings` > `Plugins` > `LLMSettings`
-6. Enter your data in `ApiKey` and `ModelName`
+6. Set `ModelName` here; supply `UE_AGENT_API_KEY` through the process environment as described above
 ![ProjectSettings](https://github.com/user-attachments/assets/38df097f-cac3-4a04-8028-fa46a6841d65)<br>
 
 ## Blueprint Quick Start
